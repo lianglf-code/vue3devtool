@@ -1,0 +1,47 @@
+/******/ (() => { // webpackBootstrap
+var __webpack_exports__ = {};
+/*!************************************!*\
+  !*** ./src/devtools-background.js ***!
+  \************************************/
+// This is the devtools script, which is called when the user opens the
+// Chrome devtool on a page. We check to see if we global hook has detected
+// Vue presence on the page. If yes, create the Vue panel; otherwise poll
+// for 10 seconds.
+let created = false;
+let checkCount = 0;
+chrome.devtools.network.onNavigated.addListener(createPanelIfHasVue);
+const checkVueInterval = setInterval(createPanelIfHasVue, 1000);
+createPanelIfHasVue();
+
+function createPanelIfHasVue() {
+  if (created || checkCount++ > 10) {
+    clearInterval(checkVueInterval);
+    return;
+  }
+
+  chrome.devtools.inspectedWindow.eval('!!(window.__VUE_DEVTOOLS_GLOBAL_HOOK__ && (window.__VUE_DEVTOOLS_GLOBAL_HOOK__.Vue || window.__VUE_DEVTOOLS_GLOBAL_HOOK__.apps.length))', hasVue => {
+    if (!hasVue || created) {
+      return;
+    }
+
+    clearInterval(checkVueInterval);
+    created = true;
+    chrome.devtools.panels.create('Vue', 'icons/128.png', 'devtools.html', panel => {
+      // panel loaded
+      panel.onShown.addListener(onPanelShown);
+      panel.onHidden.addListener(onPanelHidden);
+    });
+  });
+} // Manage panel visibility
+
+
+function onPanelShown() {
+  chrome.runtime.sendMessage('vue-panel-shown');
+}
+
+function onPanelHidden() {
+  chrome.runtime.sendMessage('vue-panel-hidden');
+}
+/******/ })()
+;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiZGV2dG9vbHMtYmFja2dyb3VuZC5qcyIsIm1hcHBpbmdzIjoiOzs7OztBQUFBO0FBQ0E7QUFDQTtBQUNBO0FBRUEsSUFBSUEsT0FBTyxHQUFHLEtBQWQ7QUFDQSxJQUFJQyxVQUFVLEdBQUcsQ0FBakI7QUFFQUMsTUFBTSxDQUFDQyxRQUFQLENBQWdCQyxPQUFoQixDQUF3QkMsV0FBeEIsQ0FBb0NDLFdBQXBDLENBQWdEQyxtQkFBaEQ7QUFDQSxNQUFNQyxnQkFBZ0IsR0FBR0MsV0FBVyxDQUFDRixtQkFBRCxFQUFzQixJQUF0QixDQUFwQztBQUNBQSxtQkFBbUI7O0FBRW5CLFNBQVNBLG1CQUFULEdBQStCO0VBQzdCLElBQUlQLE9BQU8sSUFBSUMsVUFBVSxLQUFLLEVBQTlCLEVBQWtDO0lBQ2hDUyxhQUFhLENBQUNGLGdCQUFELENBQWI7SUFDQTtFQUNEOztFQUNETixNQUFNLENBQUNDLFFBQVAsQ0FBZ0JRLGVBQWhCLENBQWdDQyxJQUFoQyxDQUNFLHlJQURGLEVBRUdDLE1BQUQsSUFBWTtJQUNWLElBQUksQ0FBQ0EsTUFBRCxJQUFXYixPQUFmLEVBQXdCO01BQ3RCO0lBQ0Q7O0lBQ0RVLGFBQWEsQ0FBQ0YsZ0JBQUQsQ0FBYjtJQUNBUixPQUFPLEdBQUcsSUFBVjtJQUNBRSxNQUFNLENBQUNDLFFBQVAsQ0FBZ0JXLE1BQWhCLENBQXVCQyxNQUF2QixDQUNFLEtBREYsRUFFRSxlQUZGLEVBR0UsZUFIRixFQUlHQyxLQUFELElBQVc7TUFDVDtNQUNBQSxLQUFLLENBQUNDLE9BQU4sQ0FBY1gsV0FBZCxDQUEwQlksWUFBMUI7TUFDQUYsS0FBSyxDQUFDRyxRQUFOLENBQWViLFdBQWYsQ0FBMkJjLGFBQTNCO0lBQ0QsQ0FSSDtFQVVELENBbEJIO0FBb0JELEVBRUQ7OztBQUVBLFNBQVNGLFlBQVQsR0FBd0I7RUFDdEJoQixNQUFNLENBQUNtQixPQUFQLENBQWVDLFdBQWYsQ0FBMkIsaUJBQTNCO0FBQ0Q7O0FBRUQsU0FBU0YsYUFBVCxHQUF5QjtFQUN2QmxCLE1BQU0sQ0FBQ21CLE9BQVAsQ0FBZUMsV0FBZixDQUEyQixrQkFBM0I7QUFDRCxDIiwic291cmNlcyI6WyJ3ZWJwYWNrOi8vQHZ1ZS1kZXZ0b29scy9zaGVsbC1jaHJvbWUvLi9zcmMvZGV2dG9vbHMtYmFja2dyb3VuZC5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyIvLyBUaGlzIGlzIHRoZSBkZXZ0b29scyBzY3JpcHQsIHdoaWNoIGlzIGNhbGxlZCB3aGVuIHRoZSB1c2VyIG9wZW5zIHRoZVxuLy8gQ2hyb21lIGRldnRvb2wgb24gYSBwYWdlLiBXZSBjaGVjayB0byBzZWUgaWYgd2UgZ2xvYmFsIGhvb2sgaGFzIGRldGVjdGVkXG4vLyBWdWUgcHJlc2VuY2Ugb24gdGhlIHBhZ2UuIElmIHllcywgY3JlYXRlIHRoZSBWdWUgcGFuZWw7IG90aGVyd2lzZSBwb2xsXG4vLyBmb3IgMTAgc2Vjb25kcy5cblxubGV0IGNyZWF0ZWQgPSBmYWxzZVxubGV0IGNoZWNrQ291bnQgPSAwXG5cbmNocm9tZS5kZXZ0b29scy5uZXR3b3JrLm9uTmF2aWdhdGVkLmFkZExpc3RlbmVyKGNyZWF0ZVBhbmVsSWZIYXNWdWUpXG5jb25zdCBjaGVja1Z1ZUludGVydmFsID0gc2V0SW50ZXJ2YWwoY3JlYXRlUGFuZWxJZkhhc1Z1ZSwgMTAwMClcbmNyZWF0ZVBhbmVsSWZIYXNWdWUoKVxuXG5mdW5jdGlvbiBjcmVhdGVQYW5lbElmSGFzVnVlKCkge1xuICBpZiAoY3JlYXRlZCB8fCBjaGVja0NvdW50KysgPiAxMCkge1xuICAgIGNsZWFySW50ZXJ2YWwoY2hlY2tWdWVJbnRlcnZhbClcbiAgICByZXR1cm5cbiAgfVxuICBjaHJvbWUuZGV2dG9vbHMuaW5zcGVjdGVkV2luZG93LmV2YWwoXG4gICAgJyEhKHdpbmRvdy5fX1ZVRV9ERVZUT09MU19HTE9CQUxfSE9PS19fICYmICh3aW5kb3cuX19WVUVfREVWVE9PTFNfR0xPQkFMX0hPT0tfXy5WdWUgfHwgd2luZG93Ll9fVlVFX0RFVlRPT0xTX0dMT0JBTF9IT09LX18uYXBwcy5sZW5ndGgpKScsXG4gICAgKGhhc1Z1ZSkgPT4ge1xuICAgICAgaWYgKCFoYXNWdWUgfHwgY3JlYXRlZCkge1xuICAgICAgICByZXR1cm5cbiAgICAgIH1cbiAgICAgIGNsZWFySW50ZXJ2YWwoY2hlY2tWdWVJbnRlcnZhbClcbiAgICAgIGNyZWF0ZWQgPSB0cnVlXG4gICAgICBjaHJvbWUuZGV2dG9vbHMucGFuZWxzLmNyZWF0ZShcbiAgICAgICAgJ1Z1ZScsXG4gICAgICAgICdpY29ucy8xMjgucG5nJyxcbiAgICAgICAgJ2RldnRvb2xzLmh0bWwnLFxuICAgICAgICAocGFuZWwpID0+IHtcbiAgICAgICAgICAvLyBwYW5lbCBsb2FkZWRcbiAgICAgICAgICBwYW5lbC5vblNob3duLmFkZExpc3RlbmVyKG9uUGFuZWxTaG93bilcbiAgICAgICAgICBwYW5lbC5vbkhpZGRlbi5hZGRMaXN0ZW5lcihvblBhbmVsSGlkZGVuKVxuICAgICAgICB9LFxuICAgICAgKVxuICAgIH0sXG4gIClcbn1cblxuLy8gTWFuYWdlIHBhbmVsIHZpc2liaWxpdHlcblxuZnVuY3Rpb24gb25QYW5lbFNob3duKCkge1xuICBjaHJvbWUucnVudGltZS5zZW5kTWVzc2FnZSgndnVlLXBhbmVsLXNob3duJylcbn1cblxuZnVuY3Rpb24gb25QYW5lbEhpZGRlbigpIHtcbiAgY2hyb21lLnJ1bnRpbWUuc2VuZE1lc3NhZ2UoJ3Z1ZS1wYW5lbC1oaWRkZW4nKVxufVxuIl0sIm5hbWVzIjpbImNyZWF0ZWQiLCJjaGVja0NvdW50IiwiY2hyb21lIiwiZGV2dG9vbHMiLCJuZXR3b3JrIiwib25OYXZpZ2F0ZWQiLCJhZGRMaXN0ZW5lciIsImNyZWF0ZVBhbmVsSWZIYXNWdWUiLCJjaGVja1Z1ZUludGVydmFsIiwic2V0SW50ZXJ2YWwiLCJjbGVhckludGVydmFsIiwiaW5zcGVjdGVkV2luZG93IiwiZXZhbCIsImhhc1Z1ZSIsInBhbmVscyIsImNyZWF0ZSIsInBhbmVsIiwib25TaG93biIsIm9uUGFuZWxTaG93biIsIm9uSGlkZGVuIiwib25QYW5lbEhpZGRlbiIsInJ1bnRpbWUiLCJzZW5kTWVzc2FnZSJdLCJzb3VyY2VSb290IjoiIn0=
